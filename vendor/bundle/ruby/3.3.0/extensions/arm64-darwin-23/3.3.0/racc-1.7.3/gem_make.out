@@ -1,0 +1,18 @@
+current directory: /Users/ryomak/src/github.com/ryomak/rails-example/vendor/bundle/ruby/3.3.0/gems/racc-1.7.3/ext/racc/cparse
+/Users/ryomak/.rbenv/versions/3.3.0/bin/ruby extconf.rb
+creating Makefile
+
+current directory: /Users/ryomak/src/github.com/ryomak/rails-example/vendor/bundle/ruby/3.3.0/gems/racc-1.7.3/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20240227-15538-nxkxjh sitelibdir\=./.gem.20240227-15538-nxkxjh clean
+
+current directory: /Users/ryomak/src/github.com/ryomak/rails-example/vendor/bundle/ruby/3.3.0/gems/racc-1.7.3/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20240227-15538-nxkxjh sitelibdir\=./.gem.20240227-15538-nxkxjh
+compiling cparse.c
+linking shared-object racc/cparse.bundle
+
+current directory: /Users/ryomak/src/github.com/ryomak/rails-example/vendor/bundle/ruby/3.3.0/gems/racc-1.7.3/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20240227-15538-nxkxjh sitelibdir\=./.gem.20240227-15538-nxkxjh install
+/opt/homebrew/bin/ginstall -c -m 0755 cparse.bundle ./.gem.20240227-15538-nxkxjh/racc
+
+current directory: /Users/ryomak/src/github.com/ryomak/rails-example/vendor/bundle/ruby/3.3.0/gems/racc-1.7.3/ext/racc/cparse
+make DESTDIR\= sitearchdir\=./.gem.20240227-15538-nxkxjh sitelibdir\=./.gem.20240227-15538-nxkxjh clean
