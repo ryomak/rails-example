@@ -1,0 +1,25 @@
+<h1>TODO</h1>
+
+<p ><%= notice %></p>
+<table>
+  <thead>
+  <tr>
+    <th>content</th>
+    <th>completedAt</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @todo_items.each do |todoItem| %>
+    <tr>
+      <td><%= todoItem.content %></td>
+      <td><%= todoItem.completedAt %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<h2>作成</h2>
+<%= form_tag({:controller => 'todo_items', :action => 'create', :user_id => @user_id }, {:method => :post}) do %>
+  <%= text_area_tag :content %>
+  <%= submit_tag "送信" %>        <!-- 送信ボタン -->
+<% end %>

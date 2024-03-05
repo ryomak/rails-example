@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_27_091932) do
+ActiveRecord::Schema[7.1].define(version: 2024_03_05_133421) do
   create_table "articles", force: :cascade do |t|
     t.string "title"
     t.text "body"
@@ -18,4 +18,31 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_27_091932) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "tasks", force: :cascade do |t|
+    t.string "content"
+    t.boolean "is_check"
+    t.datetime "at"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_tasks_on_user_id"
+  end
+
+  create_table "todo_items", force: :cascade do |t|
+    t.string "content"
+    t.datetime "completedAt"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_todo_items_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_foreign_key "tasks", "users"
+  add_foreign_key "todo_items", "users"
 end
