@@ -27,5 +27,7 @@ class TaskController < ApplicationController
   # Never trust parameters from the scary internet, only allow the white list through.
   def todo_list_params
     params.require(:todo_list).permit(:title, :description)
+    ##
+    # {"todo_list": { "title": ""}}
   end
 end

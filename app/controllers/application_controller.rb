@@ -11,4 +11,6 @@ class ApplicationController < ActionController::Base
         render json: { error: error.message }, status: :internal_server_error
     end
 
+
 end
+
