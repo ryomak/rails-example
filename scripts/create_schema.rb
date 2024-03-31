@@ -1,4 +1,4 @@
-require_relative '../app/lib/vector_store/weaviate.rb'
+require_relative '../app/lib/vector_store/client.rb'
 
 class Schema
   def self.execute

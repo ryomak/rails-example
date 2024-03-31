@@ -1,4 +1,4 @@
-require_relative '../app/lib/llm/llm.rb'
+require_relative '../app/lib/llm/client.rb'
 
 class TestOpenAI
 

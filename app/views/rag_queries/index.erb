@@ -1,0 +1,32 @@
+<%= form_with url: search_rag_queries_path, method: :post, id: "search-form", local: false do |form| %>
+  <%= form.label :text, "テキスト" %>
+  <%= form.text_field :text %>
+
+  <%= form.label :image_url, "画像URL" %>
+  <%= form.text_field :image_url %>
+
+  <%= form.submit "検索" %>
+<% end %>
+
+<div id="search-results"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById("search-form");
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const searchResults = document.getElementById("search-results");
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    searchResults.innerHTML = `<p>${data.message}</p>`;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
