@@ -60,3 +60,10 @@ group :development do
   # gem "spring"
 end
 
+
+gem "weaviate-ruby"
+
+gem 'dotenv-rails'
+
+gem "ruby-openai"
+
