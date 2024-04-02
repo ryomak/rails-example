@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require 'weaviate'
+
 module VectorStore
   class Client
     def initialize
@@ -9,30 +13,14 @@ module VectorStore
       )
     end
 
-    def search(msg, limit)
-      near_text = `{ concepts: ["#{msg}"] }`
-      sort_obj = '{ path: ["category"], order: desc }'
-      where_obj = '{ path: ["id"], operator: Equal, valueString: "..." }'
-      with_hybrid = '{ query: "Sweets", alpha: 0.5 }'
-
-      response = @client.query.get(
+    def search(vector, limit)
+      @client.query.get(
         class_name: 'Question',
-        fields: "question answer category _additional { answer { result hasAnswer property startPosition endPosition } }",
-        limit: limit,
+        fields: "answer",
+        near_vector: "{ vector: #{vector} }",
+        limit: limit.to_s,
         offset: "0",
-        after: "id",
-        sort: sort_obj,
-        where: where_obj,
-
-        # To use this parameter you must have created your schema by setting the `vectorizer:` property to
-        # either 'text2vec-transformers', 'text2vec-contextionary', 'text2vec-openai', 'multi2vec-clip', 'text2vec-huggingface' or 'text2vec-cohere'
-        near_text: near_text,
-
-        with_hybrid: with_hybrid,
       )
-
-      pp response
-      response
     end
 
 
@@ -65,6 +53,17 @@ module VectorStore
 
     def list
       puts @client.schema.list
+    end
+
+    def create_data(question, answer, vector)
+      @client.objects.create(
+        class_name: 'Question',
+        vector: vector,
+        properties: {
+          answer: answer,
+          question: question,
+        }
+      )
     end
   end
 end

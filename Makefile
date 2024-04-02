@@ -1,6 +1,12 @@
-.PHONY: test-openai
+.PHONY: test-openai create-schema create-data
+
+RAILS_RUNNER := ./bin/rails runner
+
 test-openai:
-    ./bin/rails runner scripts/test_openai.rb
-.PHONY: create-schema
+	$(RAILS_RUNNER) scripts/test_openai.rb
+
 create-schema:
-    ./bin/rails runner scripts/create_schema.rb
+	$(RAILS_RUNNER) scripts/create_schema.rb
+
+create-data:
+	$(RAILS_RUNNER) scripts/create_data.rb

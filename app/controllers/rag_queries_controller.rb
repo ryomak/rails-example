@@ -1,12 +1,15 @@
+# frozen_string_literal: true
+
 class RagQueriesController < ApplicationController
   def index
   end
 
   def search
-    @rag_service = RagService.new
-    response = @rag_service.search(params[:text], params[:image_url])
+    rag_service = RagService.new
+    response = rag_service.search(params[:text], params[:image_url])
+    pp response
     render json: {
-      res: response
+      message: response
     }
   end
 end
