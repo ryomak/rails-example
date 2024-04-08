@@ -67,3 +67,5 @@ gem 'dotenv-rails'
 
 gem "ruby-openai"
 
+
+gem "langchainrb", "~> 0.11.0"

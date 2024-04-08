@@ -2,9 +2,15 @@ require_relative '../app/lib/vector_store/client.rb'
 
 class Schema
   def self.execute
-    client = VectorStore::Client.new
-    client.create_schema
-    puts client.list
+    try do
+      client = VectorStore::Client.new
+      client.create_schema
+    end
+
+    try do
+      langchain = Qa.new
+      langchain.create_schema
+    end
   end
 end
 
