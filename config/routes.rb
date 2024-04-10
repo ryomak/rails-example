@@ -15,7 +15,8 @@ Rails.application.routes.draw do
   resources :rag_queries, only: [:index] do
     collection do
       post :search
-      post :langchain_search
+      post :search_normal_by_langchain
+      post :search_custom_by_langchain
     end
   end
 

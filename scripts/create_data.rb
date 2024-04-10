@@ -10,8 +10,12 @@ class Schema
     client.create_data(key, "メモには120文字以上の文章をいれることができません", llm.create_vector(key))
 
 
-    langchain = Qa.new
-    langchain.input(["メモには120文字以上の文章をいれることができません"])
+    qa = Qa.new
+    docs = qa.load_from_dir("tmp/code")
+    docs.each do |doc|
+      qa.input(doc.value)
+    end
+
   end
 end
 
