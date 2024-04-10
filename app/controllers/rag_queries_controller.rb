@@ -2,9 +2,8 @@
 
 class RagQueriesController < ApplicationController
   def index
-    @api1_path = '/rag_queries/search'
-    @api2_path = '/rag_queries/search_normal_by_langchain'
-    @api3_path = '/rag_queries/search_custom_by_langchain'
+    @api1_path = '/rag_queries/search_normal_by_langchain'
+    @api2_path = '/rag_queries/search_custom_by_langchain'
   end
 
   def search

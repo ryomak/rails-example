@@ -10,16 +10,12 @@
 
   <div class="results">
     <div class="result-card">
-      <h3><span class="emoji">&#128736;</span> DEFAULT</h3>
+      <h3><span class="emoji">&#128736;</span> Normal RAG</h3>
       <div id="search-no1" class="search-results"></div>
     </div>
     <div class="result-card">
-      <h3><span class="emoji">&#128736;</span> Normal RAG</h3>
-      <div id="search-no2" class="search-results"></div>
-    </div>
-    <div class="result-card">
       <h3><span class="emoji">&#128736;</span> Custom RAG</h3>
-      <div id="search-no3" class="search-results"></div>
+      <div id="search-no2" class="search-results"></div>
     </div>
   </div>
 </div>
@@ -58,15 +54,6 @@
               })
               .catch(error => console.error('Error:', error));
 
-            fetch("<%= @api3_path %>", {
-                method: 'POST',
-                body: formData,
-            })
-              .then(response => response.json())
-              .then(data => {
-                  searchResults[2].innerHTML = `<p>${data.message}</p>`;
-              })
-              .catch(error => console.error('Error:', error));
         });
     });
 </script>
@@ -147,7 +134,7 @@
     }
 
     .result-card {
-        width: 300px;
+        width: 500px;
         padding: 20px;
         border-radius: 10px;
         background-color: #333333;
