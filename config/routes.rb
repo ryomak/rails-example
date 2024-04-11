@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   # root "posts#index"
   resources :articles
 
-  resources :rag_queries, only: [:index] do
+  resources :code_ai, only: [:index] do
     collection do
       post :search
       post :search_normal_by_langchain

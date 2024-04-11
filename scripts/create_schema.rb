@@ -8,7 +8,7 @@ class Schema
     end
 
     try do
-      langchain = Qa.new
+      langchain = CodeAi.new
       langchain.create_schema
     end
   end

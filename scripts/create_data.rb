@@ -10,7 +10,7 @@ class Schema
     client.create_data(key, "メモには120文字以上の文章をいれることができません", llm.create_vector(key))
 
 
-    qa = Qa.new
+    qa = CodeAi.new
     docs = qa.load_from_dir("tmp/code")
     docs.each do |doc|
       qa.input(doc.value)

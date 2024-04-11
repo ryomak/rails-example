@@ -1,4 +1,4 @@
-class Qa
+class CodeAi
 
   def initialize
     @llm = Langchain::LLM::OpenAI.new(api_key: ENV["OPENAI_API_KEY"], llm_options:{
@@ -16,6 +16,7 @@ class Qa
   def create_schema
     @vector_search.create_default_schema
   end
+
   def input(texts)
     @vector_search.add_texts(texts: texts)
   end

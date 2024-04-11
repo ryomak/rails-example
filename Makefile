@@ -1,12 +1,7 @@
-.PHONY: test-openai create-schema create-data
-
-RAILS_RUNNER := ./bin/rails runner
-
-test-openai:
-	$(RAILS_RUNNER) scripts/test_openai.rb
+.PHONY: create-schema create-data
 
 create-schema:
-	$(RAILS_RUNNER) scripts/create_schema.rb
+    ./bin/rake schema:create
 
 create-data:
-	$(RAILS_RUNNER) scripts/create_data.rb
+    ./bin/rake vector:insert['tmp/code']
