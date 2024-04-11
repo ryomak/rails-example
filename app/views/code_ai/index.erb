@@ -1,3 +1,4 @@
+
 <div class="container">
   <%= form_with id: "search-form", local: false do |form| %>
     <div class="input-group">
@@ -20,6 +21,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.getElementById("search-form");
@@ -40,7 +42,7 @@
             })
               .then(response => response.json())
               .then(data => {
-                  searchResults[0].innerHTML = `<p>${data.message}</p>`;
+                  searchResults[0].innerHTML = marked.parse(data.message);
               })
               .catch(error => console.error('Error:', error));
 
@@ -50,7 +52,7 @@
             })
               .then(response => response.json())
               .then(data => {
-                  searchResults[1].innerHTML = `<p>${data.message}</p>`;
+                  searchResults[1].innerHTML = marked.parse(data.message);
               })
               .catch(error => console.error('Error:', error));
 
@@ -76,7 +78,7 @@
     }
 
     .container {
-        width: 1000px;
+        width: 1100px;
         padding: 40px;
         background-color: #444444;
         border-radius: 10px;
@@ -186,5 +188,17 @@
         to {
             transform: rotate(360deg);
         }
+    }
+
+    pre {
+        background: #292929;
+        padding: 8px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        overflow: scroll;
+        scrollbar-width: none;
+    }
+    pre::-webkit-scrollbar {
+        display: none;
     }
 </style>

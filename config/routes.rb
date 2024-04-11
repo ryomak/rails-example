@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  get 'rag_queries/new'
-  get 'rag_queries/create'
+  get 'code_ai/new'
+  get 'code_ai/create'
   get 'search_queries/new'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
