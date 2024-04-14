@@ -21,7 +21,7 @@ namespace :search do
     result = qa.ask_custom(args[:question])
     Rails.logger.info '===============output-end==============='
 
-    pp result
+    puts result
     Rails.logger.info '===============End==============='
   end
 end

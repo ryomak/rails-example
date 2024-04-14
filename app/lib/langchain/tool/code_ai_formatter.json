@@ -1,0 +1,23 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "code_ai_formatter-execute",
+      "description": "コードAIのレスポンスを生成する",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reply": {
+            "type": "string",
+            "description": "質問に対する回答の文章。関西弁を使用"
+          },
+          "code": {
+            "type": "string",
+            "description": "説明で使用する実際のコード。内部実装であったり、使い方を説明するために利用"
+          }
+        },
+        "required": ["reply","code"]
+      }
+    }
+  }
+]
