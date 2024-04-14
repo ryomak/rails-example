@@ -33,7 +33,8 @@ class CodeAi
   end
 
   def ask_normal(question)
-    @vector_search.ask(question: question)
+    response = @vector_search.ask(question: question)
+    response.raw_response.dig("choices", 0, "message", "content")
   end
 
   def ask_custom(question)

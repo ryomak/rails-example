@@ -18,7 +18,7 @@ class CodeAiController < ApplicationController
     ai = CodeAi.new
     response = ai.ask_normal(params[:text])
     render json: {
-      message: response.raw_response.dig("choices", 0, "message", "content")
+      message: response
     }
   end
 
