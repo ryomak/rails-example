@@ -4,16 +4,20 @@ namespace :schema do
   MSG
 
   task create: :environment do
-    begin
-      client = VectorStore::Client.new
-      client.create_schema
-    rescue => e
-      Rails.logger.error e
-    end
+    ## service example
+    ##begin
+    ##  client = VectorStore::Client.new
+    ##  client.create_schema
+    ##rescue => e
+    ##  Rails.logger.error e
+    ##end
 
     begin
-      ai = CodeAi.new
-      ai.create_schema
+      [ENV['WEAVIATE_INDEX_CODE'], ENV["WEAVIATE_INDEX_SUMMARY"], ENV["WEAVIATE_INDEX_CODE_CUSTOM"], ENV["WEAVIATE_INDEX_SUMMARY_CUSTOM"]].each do |index|
+        pp index
+        vector_search = FileToVectorConverter.new index: index
+        pp vector_search.create_schema
+      end
     rescue => e
       Rails.logger.error e
     end

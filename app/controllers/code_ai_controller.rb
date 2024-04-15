@@ -23,8 +23,8 @@ class CodeAiController < ApplicationController
   end
 
   def search_custom_by_langchain
-    ai = CodeAi.new
-    response = ai.ask_rag_fusion(params[:text])
+    ai = CodeAi.new custom: true
+    response = ai.ask_custom(params[:text])
     render json: {
       message: response
     }

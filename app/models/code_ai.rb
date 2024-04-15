@@ -1,65 +1,56 @@
 class CodeAi
 
-  def initialize(index: "Langchain")
+  def initialize(custom: false)
     @llm = Langchain::LLM::OpenAI.new(api_key: ENV["OPENAI_API_KEY"], llm_options:{
       model: "gpt-4",
     })
-    @vector_search =  Langchain::Vectorsearch::Weaviate.new(
+    @code_vector_search =  Langchain::Vectorsearch::Weaviate.new(
       url: 'http://localhost:8080',
       api_key: '',
-      index_name: index,
+      index_name: custom ? ENV["WEAVIATE_INDEX_CODE_CUSTOM"] : ENV["WEAVIATE_INDEX_CODE"],
       llm: @llm,
     )
-
-  end
-
-  def create_schema
-    @vector_search.create_default_schema
-  end
-
-  def input(texts)
-    @vector_search.add_texts(texts: texts)
-  end
-
-  def load_from_dir(path, extensions: ['rb'])
-    Dir.glob(File.join(path, "**/*")).map do |file|
-      next unless extensions.include?(File.extname(file).delete('.'))
-      Langchain::Loader.load(file) do |raw_data, options|
-        "file:\n#{file} code:\n#{raw_data}"
-      end
-    rescue
-      nil
-    end.flatten.compact
+    @summary_vector_search = Langchain::Vectorsearch::Weaviate.new(
+      url: 'http://localhost:8080',
+      api_key: '',
+      index_name: custom ? ENV["WEAVIATE_INDEX_SUMMARY_CUSTOM"] : ENV["WEAVIATE_INDEX_SUMMARY"],
+      llm: @llm,
+    )
   end
 
   def ask_normal(question)
-    response = @vector_search.ask(question: question)
+    response = @code_vector_search.ask(question: question)
     response.raw_response.dig("choices", 0, "message", "content")
   end
 
   def ask_rag_fusion(question)
+    vector_search = @code_vector_search
     queries = generate_queries(question)
-    rank_hash = generate_rank_hash(queries)
+    rank_hash = generate_rank_hash(queries,vector_search)
     ranked_queries = reciprocal_rank_fusion(rank_hash)
 
     context = ranked_queries.map { |doc, _| doc }.join("\n- ")
-
-    prompt_template = %Q{あなたはコードサポートAIです。
-下記、制約を厳守しながら、コンテキストからユーザの質問に関西弁の日本語で回答してください。
-
-制約)
-- コンテキストを元に回答すること
-- 対象のファイル名やクラス名は必ず明記すること
-
-コンテキスト)
-{context}}
-    prompt = ::Langchain::Prompt::PromptTemplate.new(template: prompt_template, input_variables: ["context"]).format(context: context)
-    chat_custom(prompt, question)
+    ask_base(question, context)
   end
 
   def ask_custom(question)
+    code_data = @code_vector_search.similarity_search(query: question, k: 3).map { |data| data['content'] }
+    summary_data = @summary_vector_search.similarity_search(query: question, k: 3).map { |data| data['content'] }
+    context = %Q{
+- サマリ
+  #{summary_data.join("\n")}
+- コード
+  #{code_data.join("\n")}
+    }
 
-    context = search_custom(question: question)
+
+    ask_base(question, context)
+  end
+
+  private
+
+  ## helper methods
+  def ask_base(question, context)
 
     prompt_template = %Q{あなたはコードサポートAIです。
 下記、制約を厳守しながら、コンテキストからユーザの質問に関西弁の日本語で回答してください。
@@ -73,8 +64,6 @@ class CodeAi
     prompt = ::Langchain::Prompt::PromptTemplate.new(template: prompt_template, input_variables: ["context"]).format(context: context)
     chat_custom(prompt, question)
   end
-
-  private
 
   def chat_custom(prompt, question)
     res = @llm.chat(
@@ -108,6 +97,9 @@ class CodeAi
     "#{json['reply']}\n```ruby\n#{json['code']}\n```"
   end
 
+  ####
+  # rag fusion
+  ###
   def generate_queries(query)
     queries = @llm.chat(messages: [
       {"role": "system", "content": "You are a helpful assistant that generates multiple search queries based on a single input query."},
@@ -115,47 +107,6 @@ class CodeAi
       {"role": "user", "content": "english (4 queries):"}
     ]).completion
     queries.strip.split("\n")
-  end
-
-  ## vector_searchから似ているコードを取ってくる。その中で参照すべき関数がまだあった場合は、再起的に次のメソッド・変数を呼び出す。そしてすべての結果を結合して返す
-  def search_custom(question:, num:0)
-    results = @vector_search.similarity_search(query: question, k: 1).map { |data| data['content'] }
-
-    result = results[0]
-    combined_results = result
-
-    puts "================"
-    puts num
-    puts "================"
-
-    if has_reference?(result,num)
-      q = @llm.chat(messages: [
-        {"role": "system", "content": "与えられたコードスニペットの中で定義されていない関数や実装を取り出します。exampleを参考にして出力してください\nexample) class:Hogehoge hugahuga"},
-        {"role": "user", "content": result}
-      ]).completion
-      if q != question
-        p "=========next search query========="
-        p q
-        p "================"
-        combined_results += search_custom(question: q, num: num + 1)
-      end
-    end
-
-    combined_results
-  end
-
-  def has_reference?(result, num)
-    if num == 0
-      return true
-    end
-    if num > 3
-      return false
-    end
-
-    @llm.chat(messages: [
-      {"role": "system", "content": "You are a helpful assistant that checks if a code snippet has a reference to another function or variable. If exist then return yes else return no"},
-      {"role": "user", "content": result}
-    ]).completion.include?("no")
   end
 
   # Reciprocal Rank Fusion algorithm
@@ -185,10 +136,10 @@ class CodeAi
   end
 
 
-  def generate_rank_hash(queries)
+  def generate_rank_hash(queries,search)
     rank_hash = {}
     queries.each do |query|
-      rank_hash[query] = @vector_search.similarity_search(query: query, k: 5).map { |data| data['content'] }
+      rank_hash[query] = search.similarity_search(query: query, k: 5).map { |data| data['content'] }
     end
     rank_hash
   end

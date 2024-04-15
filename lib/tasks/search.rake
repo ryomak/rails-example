@@ -3,11 +3,9 @@ namespace :search do
     dataをvectorに入れる
   MSG
 
-  index = "Langchain"
-
   task :normal, ['question'] => :environment do |task, args|
     Rails.logger.info '===============search normal Start==============='
-    qa = CodeAi.new index: index
+    qa = CodeAi.new
     result = qa.ask_normal(args[:question])
 
     Rails.logger.info '===============output-start==============='
@@ -18,7 +16,9 @@ namespace :search do
 
   task :fusion, ['question'] => :environment do |task, args|
     Rails.logger.info '===============search fusion Start==============='
-    qa = CodeAi.new index: index
+
+    qa = CodeAi.new custom: true
+
     Rails.logger.info '===============output-start==============='
     result = qa.ask_rag_fusion(args[:question])
     Rails.logger.info '===============output-end==============='
@@ -29,7 +29,9 @@ namespace :search do
 
   task :custom, ['question'] => :environment do |task, args|
     Rails.logger.info '===============search custom Start==============='
-    qa = CodeAi.new index: index
+
+    qa = CodeAi.new custom: true
+
     Rails.logger.info '===============output-start==============='
     result = qa.ask_custom(args[:question])
     Rails.logger.info '===============output-end==============='
@@ -37,6 +39,4 @@ namespace :search do
     puts result
     Rails.logger.info '===============End==============='
   end
-
-
 end
