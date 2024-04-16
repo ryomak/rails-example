@@ -19,14 +19,17 @@ class CodeAi
   end
 
   def ask_normal(question)
-    response = @code_vector_search.ask(question: question)
+    response = @code_vector_search.ask(question: question, k: 1)
     response.raw_response.dig("choices", 0, "message", "content")
   end
 
   def ask_rag_fusion(question)
-    vector_search = @code_vector_search
+    vector_search = @summary_vector_search
+    ## 質問を元に複数の検索クエリを生成
     queries = generate_queries(question)
+    ## 検索クエリ毎に関連情報をとってくる
     rank_hash = generate_rank_hash(queries,vector_search)
+    ## Reciprocal Rank Fusion(RRF)で結果を統合
     ranked_queries = reciprocal_rank_fusion(rank_hash)
 
     context = ranked_queries.map { |doc, _| doc }.join("\n- ")
@@ -34,15 +37,16 @@ class CodeAi
   end
 
   def ask_custom(question)
-    code_data = @code_vector_search.similarity_search(query: question, k: 3).map { |data| data['content'] }
-    summary_data = @summary_vector_search.similarity_search(query: question, k: 3).map { |data| data['content'] }
+    code_data = @code_vector_search.similarity_search(query: question, k: 1).map { |data| data['content'] }
+    summary_data = @summary_vector_search.similarity_search(query: question, k: 1).map { |data| data['content'] }
     context = %Q{
-- サマリ
+### サマリ
   #{summary_data.join("\n")}
-- コード
+### コード
   #{code_data.join("\n")}
     }
 
+    puts context
 
     ask_base(question, context)
   end
@@ -53,14 +57,18 @@ class CodeAi
   def ask_base(question, context)
 
     prompt_template = %Q{あなたはコードサポートAIです。
-下記、制約を厳守しながら、コンテキストからユーザの質問に関西弁の日本語で回答してください。
+下記、制約を厳守しながら、コンテキストの情報からユーザの質問に褒めながら回答してください。
 
-制約)
+## 制約
 - コンテキストを元に回答すること
 - 対象のファイル名やクラス名は必ず明記すること
+- 日本語で回答すること
 
-コンテキスト)
-{context}}
+## コンテキスト
+```
+{context}
+```
+}
     prompt = ::Langchain::Prompt::PromptTemplate.new(template: prompt_template, input_variables: ["context"]).format(context: context)
     chat_custom(prompt, question)
   end
@@ -79,11 +87,11 @@ class CodeAi
               "properties": {
                 "reply": {
                   "type": "string",
-                  "description": "質問に対する回答の文章。関西弁を使用"
+                  "description": "質問に対する回答の文章。"
                 },
                 "code": {
                   "type": "string",
-                  "description": "説明で使用する実際のコード。内部実装であったり、使い方を説明するために利用"
+                  "description": "説明で使用する実際のコード。内部実装であったり、使い方を説明するために利用する。実行できる状態にすること"
                 }
               },
               "required": %w[reply code]
