@@ -29,4 +29,18 @@ namespace :search do
     Rails.logger.info '===============End==============='
   end
 
+  task :web, ['question'] => :environment do |task, args|
+    Rails.logger.info '===============search custom Start==============='
+    @llm = Langchain::LLM::OpenAI.new(api_key: ENV["OPENAI_API_KEY"], llm_options:{
+      model: "gpt-4",
+    })
+    @vector_search =  Langchain::Vectorsearch::Weaviate.new(
+      url: 'http://localhost:8080',
+      api_key: '',
+      index_name: ENV["WEAVIATE_INDEX_WEB"],
+      llm: @llm,
+    )
+    puts @vector_search.ask(question: args[:question], k: 3).raw_response.dig("choices", 0, "message", "content")
+    Rails.logger.info '===============End==============='
+  end
 end

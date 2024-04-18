@@ -1,9 +1,7 @@
 class CodeAi
 
   def initialize(custom: false)
-    @llm = Langchain::LLM::OpenAI.new(api_key: ENV["OPENAI_API_KEY"], llm_options:{
-      model: "gpt-4",
-    })
+    @llm = Langchain::LLM::OpenAI.new(api_key: ENV["OPENAI_API_KEY"])
     @code_vector_search =  Langchain::Vectorsearch::Weaviate.new(
       url: 'http://localhost:8080',
       api_key: '',
@@ -19,8 +17,8 @@ class CodeAi
   end
 
   def ask_normal(question)
-    response = @code_vector_search.ask(question: question, k: 1)
-    response.raw_response.dig("choices", 0, "message", "content")
+    response = @code_vector_search.ask(question: question)
+    response.completion
   end
 
   def ask_rag_fusion(question)
@@ -30,9 +28,8 @@ class CodeAi
     ## 検索クエリ毎に関連情報をとってくる
     rank_hash = generate_rank_hash(queries,vector_search)
     ## Reciprocal Rank Fusion(RRF)で結果を統合
-    ranked_queries = reciprocal_rank_fusion(rank_hash)
+    context = reciprocal_rank_fusion(rank_hash)
 
-    context = ranked_queries.map { |doc, _| doc }.join("\n- ")
     ask_base(question, context)
   end
 
@@ -57,19 +54,28 @@ class CodeAi
   def ask_base(question, context)
 
     prompt_template = %Q{あなたはコードサポートAIです。
-下記、制約を厳守しながら、コンテキストの情報からユーザの質問に褒めながら回答してください。
+下記、制約を厳守しながら、コンテキストの情報から質問に回答してください。
+出力方式に従うこと
 
 ## 制約
 - コンテキストを元に回答すること
 - 対象のファイル名やクラス名は必ず明記すること
 - 日本語で回答すること
 
+## 出力
+説明)
+- 質問に対する回答の文章(関西弁で褒めながら)
+使い方)
+
+
 ## コンテキスト
 ```
 {context}
 ```
 }
-    prompt = ::Langchain::Prompt::PromptTemplate.new(template: prompt_template, input_variables: ["context"]).format(context: context)
+    #prompt = Langchain::Prompt::PromptTemplate.new(template: prompt_template, input_variables: ["context"]).format(context: context)
+    prompt = Langchain::Vectorsearch::Base.new(llm: @llm).generate_rag_prompt(question: question, context: context)
+    puts context
     chat_custom(prompt, question)
   end
 
@@ -140,7 +146,7 @@ class CodeAi
       puts "RRF score: #{score}"
     end
 
-    reranked_results
+    reranked_results.keys[0..2].join("\n\n")
   end
 
 

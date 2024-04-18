@@ -8,7 +8,7 @@ class FileToVectorConverter
       api_key: '',
       index_name: index,
       llm: @llm,
-      )
+    )
   end
 
   def create_schema
@@ -38,23 +38,18 @@ class FileToVectorConverter
 
   def summarize_for_input(file, raw_data)
     @llm.chat(messages: [
-      {"role": "user", "content": %Q{#{file}のコードです。コードの内容を多くても２００文字程度で要約してください。そしてフォーマットに沿って出力してください。
-また、複数のクラスや関数がある場合は、簡単な処理をリストアップしてください。関数の時は、引数や返り値も記載してください。
+      {"role": "user", "content": %Q{#{file}のコードです。処理を200文字程度で要約してください。具体的な処理が不明な場合は推測してください。
+また、複数のクラスや関数がある場合は、簡単な処理をリストアップしてください。関数名・引数やクラスの変数なども記載してください。出力例に従って記載してください。
 
-フォーマット)
-### ファイル名
-xxx.rb
-### 要約
-yyyy,xxxx
-### 使い方
-zzzzzz.
-### クラスや関数一覧
-AAAA:BBBB  CCCCという機能を提供する関数です。引数はDDDDで、返り値はEEEEです。
-
-コード)
 ```ruby[#{file}]
 #{raw_data}
 ```
+
+出力例)
+- 関数・クラス名: hogehoe
+- 処理: hugahuga
+- 引数: xxx　意図: xxxx
+- 出力: hogehoge
 }},
     ]).completion
   end

@@ -13,7 +13,7 @@ namespace :schema do
     ##end
 
     begin
-      [ENV['WEAVIATE_INDEX_CODE'], ENV["WEAVIATE_INDEX_SUMMARY"], ENV["WEAVIATE_INDEX_CODE_CUSTOM"], ENV["WEAVIATE_INDEX_SUMMARY_CUSTOM"]].each do |index|
+      [ENV['WEAVIATE_INDEX_CODE'], ENV["WEAVIATE_INDEX_SUMMARY"], ENV["WEAVIATE_INDEX_CODE_CUSTOM"], ENV["WEAVIATE_INDEX_SUMMARY_CUSTOM"],ENV["WEAVIATE_INDEX_WEB"]].each do |index|
         pp index
         vector_search = FileToVectorConverter.new index: index
         pp vector_search.create_schema
