@@ -41,8 +41,7 @@ namespace :vector do
       ## 拡張子にrbが含まれているので、blockで処理を行う
       res = Langchain::Loader.load args[:dir] do |raw_data, options|
         raw_data
-      end.map(&:value)
-      puts res.length
+      end.chunks.map(&:text)
     rescue => e
 
     end

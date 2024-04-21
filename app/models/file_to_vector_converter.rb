@@ -19,7 +19,7 @@ class FileToVectorConverter
     @vector_search.add_texts(texts: texts)
   end
 
-  def load_from_dir(path, extensions:['rb'], &block)
+  def load_from_dir(path, extensions:['rb','md','erb'], &block)
     Dir.glob(File.join(path, "**/*")).map do |file|
       next unless extensions.include?(File.extname(file).delete('.'))
       if block_given?
@@ -28,7 +28,7 @@ class FileToVectorConverter
       else
         Langchain::Loader.load(file) do |raw_data, options|
           "file:\n#{file} code:\n#{raw_data}"
-        end.value
+        end.chunks.map(&:text)
       end
     rescue => e
       puts e
@@ -46,6 +46,7 @@ class FileToVectorConverter
 ```
 
 出力例)
+- ファイル名: hoge.rb
 - 関数・クラス名: hogehoe
 - 処理: hugahuga
 - 引数: xxx　意図: xxxx

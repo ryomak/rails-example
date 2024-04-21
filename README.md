@@ -1,24 +1,18 @@
 # README
+Langchain.rbを試す用のレポジトリ
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Usage
+### Weaviate準備
+```
+$ docker compose up
+$ ./bin/rake schema:create
 
-Things you may want to cover:
+## target Repositoryをtmp/codeに入れる
+$ ./bin/rake vector:insert
+$ ./bin/rake vector:insert_custom
+```
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+### 実行
+```
+$ ./bin/rake search:normal['これはなんですか？']
+```

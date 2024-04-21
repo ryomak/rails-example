@@ -22,7 +22,7 @@ class CodeAi
   end
 
   def ask_rag_fusion(question)
-    vector_search = @summary_vector_search
+    vector_search = @code_vector_search
     ## 質問を元に複数の検索クエリを生成
     queries = generate_queries(question)
     ## 検索クエリ毎に関連情報をとってくる
@@ -34,7 +34,7 @@ class CodeAi
   end
 
   def ask_custom(question)
-    code_data = @code_vector_search.similarity_search(query: question, k: 1).map { |data| data['content'] }
+    code_data = @code_vector_search.similarity_search(query: question, k: 3).map { |data| data['content'] }
     summary_data = @summary_vector_search.similarity_search(query: question, k: 1).map { |data| data['content'] }
     context = %Q{
 ### サマリ
@@ -53,19 +53,24 @@ class CodeAi
   ## helper methods
   def ask_base(question, context)
 
-    prompt_template = %Q{あなたはコードサポートAIです。
+    prompt_template = %Q{あなたは、クロちゃんです。
 下記、制約を厳守しながら、コンテキストの情報から質問に回答してください。
-出力方式に従うこと
+また、出力は出力例に従うこと
 
 ## 制約
 - コンテキストを元に回答すること
 - 対象のファイル名やクラス名は必ず明記すること
 - 日本語で回答すること
+- 語尾に必ず「だしん」や「しん」をつけること。説明中にもつけること
+- 一定の確率で、「わわわわー」や「なんなのぉー」と冒頭で言うこと
 
-## 出力
+## 出力例
 説明)
-- 質問に対する回答の文章(関西弁で褒めながら)
+- hogehoge
 使い方)
+```ruby
+aaaaaa.bbbbbb
+```
 
 
 ## コンテキスト
@@ -73,42 +78,21 @@ class CodeAi
 {context}
 ```
 }
-    #prompt = Langchain::Prompt::PromptTemplate.new(template: prompt_template, input_variables: ["context"]).format(context: context)
-    prompt = Langchain::Vectorsearch::Base.new(llm: @llm).generate_rag_prompt(question: question, context: context)
+    prompt = Langchain::Prompt::PromptTemplate.new(
+      template: prompt_template,
+      input_variables: ["context"]
+    ).format(context: context)
+    #prompt = Langchain::Vectorsearch::Base.new(llm: @llm).generate_rag_prompt(question: question, context: context)
     puts context
-    chat_custom(prompt, question)
+    @llm.chat(
+      messages: [{role: "system", content: prompt},{role:"user", content:question}],
+    ).completion
   end
 
   def chat_custom(prompt, question)
-    res = @llm.chat(
+    @llm.chat(
       messages: [{role: "system", content: prompt},{role:"user", content:question}],
-      tools: [
-        {
-          "type": "function",
-          "function": {
-            "name": "generate_code_ai_reply",
-            "description": "コードサポートAIの回答を出力する",
-            "parameters": {
-              "type": "object",
-              "properties": {
-                "reply": {
-                  "type": "string",
-                  "description": "質問に対する回答の文章。"
-                },
-                "code": {
-                  "type": "string",
-                  "description": "説明で使用する実際のコード。内部実装であったり、使い方を説明するために利用する。実行できる状態にすること"
-                }
-              },
-              "required": %w[reply code]
-            }
-          }
-        }
-      ],
-      tool_choice: {"type": "function", "function": {"name": "generate_code_ai_reply"}},
-    )
-    json = JSON.parse(res.raw_response.dig("choices",0,"message","tool_calls",0,"function","arguments"))
-    "#{json['reply']}\n```ruby\n#{json['code']}\n```"
+    ).completion
   end
 
   ####
@@ -127,14 +111,10 @@ class CodeAi
   def reciprocal_rank_fusion(search_results_dict, k = 60)
     fused_scores = {}
 
-    puts "Initial individual search result ranks:"
-
-    search_results_dict.each do |query, doc_scores|
-      doc_scores.sort_by { |_, score| score.to_f }.reverse.each_with_index do |(doc, score), rank|
+    search_results_dict.each do |query, docs|
+      docs.each_with_index do |doc, rank|
         fused_scores[doc] ||= 0
-        previous_score = fused_scores[doc]
         fused_scores[doc] += 1.0 / (rank + k)
-        puts "Updating score from #{previous_score} to #{fused_scores[doc]} based on rank #{rank} in query '#{query}'"
       end
     end
 
@@ -146,7 +126,7 @@ class CodeAi
       puts "RRF score: #{score}"
     end
 
-    reranked_results.keys[0..2].join("\n\n")
+    reranked_results.keys[0..3].join("\n\n---\n\n")
   end
 
 
@@ -157,5 +137,7 @@ class CodeAi
     end
     rank_hash
   end
+
+
 
 end

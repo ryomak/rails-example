@@ -5,7 +5,7 @@ namespace :search do
 
   task :normal, ['question'] => :environment do |task, args|
     Rails.logger.info '===============search normal Start==============='
-    qa = CodeAi.new
+    qa = CodeAi.new custom: true
     result = qa.ask_normal(args[:question])
     puts result
     Rails.logger.info '===============End==============='
