@@ -11,6 +11,15 @@ $ ./bin/rake schema:create
 $ ./bin/rake vector:insert
 $ ./bin/rake vector:insert_custom
 ```
+### 環境変数
+```
+OPENAI_API_KEY='hogehoge'
+WEAVIATE_INDEX_CODE='CodeVectorAlba'
+WEAVIATE_INDEX_SUMMARY='SummaryVectorAlba'
+WEAVIATE_INDEX_CODE_CUSTOM='CodeVectorCustomAlba'
+WEAVIATE_INDEX_SUMMARY_CUSTOM='SummaryVectorDataCustomAlba'
+WEAVIATE_INDEX_WEB="WebVectorIndexAlba"
+```
 
 ### 実行
 ```
